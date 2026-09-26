@@ -1,3 +1,4 @@
+
 # Airframe: final bundle
 
 Header‑only Wi‑Fi fault finding for the Airframe hackathon challenge. Start with `PROJECT_SUMMARY.md` (also in `docs/` as a PDF).
@@ -40,6 +41,10 @@ streamlit run dashboard.py
 pip install -r requirements-dev.txt
 python -m pytest tests -v
 ```
+
+<img width="1440" height="900" alt="deployed_engineering" src="https://github.com/user-attachments/assets/98dbbddf-0136-46cd-9364-467300200f65" />
+<img width="1440" height="900" alt="deployed_client" src="https://github.com/user-attachments/assets/0170dd10-d79e-4b67-a10a-cab8be0f8cc0" />
+<img width="1440" height="900" alt="deployed_business" src="https://github.com/user-attachments/assets/71e5c292-24f4-4919-851a-26d35ed7abd7" />
 
 Both pipelines use a secret salt file (`.airframe_salt`, created on first use) to mask MAC addresses and SSIDs. Both mask by default; the fast pipeline's `--no-mask` keeps raw identifiers for internal debugging, and its report and dashboard then say so. Keep the salt private and out of any shared copy.
 

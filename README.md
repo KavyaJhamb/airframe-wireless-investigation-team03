@@ -43,6 +43,12 @@ python -m pytest tests -v
 
 Both pipelines use a secret salt file (`.airframe_salt`, created on first use) to mask MAC addresses and SSIDs. Both mask by default; the fast pipeline's `--no-mask` keeps raw identifiers for internal debugging, and its report and dashboard then say so. Keep the salt private and out of any shared copy.
 
+## AI Declaration
+- **Code Generation:** AI (Claude) helped write the fast pipeline component . The rest of the product was entirely built by the team.
+- **Team Ownership:** The team set the direction, chose the approach, reviewed and ran everything, and checked the findings against the captures. All numbers in the pitch come from running the code on the challenge data.
+- **Data Privacy & Confidentiality:** To ensure confidentiality, all test data used during AI interactions was strictly synthetic . The actual challenge captures are not included in this repository, and all outputs have been appropriately masked.
+- **Execution Security:** All synthetic data and AI processes were run securely within a local system sandbox to guarantee data isolation and privacy.
+  
 ## Not included
 
 - **The sensor captures:** they may not leave the approved environment.

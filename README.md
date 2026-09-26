@@ -2,6 +2,8 @@
 
 Header‑only Wi‑Fi fault finding for the Airframe hackathon challenge. Start with `PROJECT_SUMMARY.md` (also in `docs/` as a PDF).
 
+**What it found in the challenge captures:** all 63 clients on the 802.1X network failed at the login step on every AP and channel. The APs never got an answer from the authentication path, so this is not a Wi‑Fi fault. Critical alert 5 s after the first failure, replayed from the captures. From 14:30:53, APs repeatedly disconnected 18 devices of one vendor. The retry spike at 14:27 is a traffic-mix effect, not the radio.
+
 ## What is where
 
 | Path | What it is |
@@ -46,4 +48,4 @@ Both pipelines use a secret salt file (`.airframe_salt`, created on first use) t
 - **The sensor captures:** they may not leave the approved environment.
 - **The downloaded public test captures:** the tests fetch them again.
 - **The uploaded `real_report.txt`:** it contains raw MAC addresses. `results/fast_pipeline_report.txt` is the same report, with every number identical, with identifiers masked.
-- **Salt files.**
+- **Salt files** (`.airframe_salt`): the key to the masking. Keep them private; `.gitignore` excludes them.

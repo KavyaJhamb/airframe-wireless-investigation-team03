@@ -1,0 +1,168 @@
+AIRFRAME ANALYSIS  (8 sensors, times in Europe/Paris)
+Identifiers: MACs keep only their vendor prefix (rest a salted hash), SSIDs hashed, EAP identities never read
+
+Findings (full list with explanations in findings.csv)
+  [CRITICAL] 802.1X failing for 63 clients on SSID-0e75838f across 26 APs  (63 clients/APs)
+  [SERIOUS ] APs keep disconnecting 18 clients (reason 2) from 14:30:53  (18 clients/APs)
+  [WARNING ] SSID-72f1f8be: 24 join attempts from 24 clients in 2 min
+  [WARNING ] Channel 36: 5 APs share it
+  [WARNING ] Channel 40: 5 APs share it
+  [INFO    ] 4-way handshake failing for b8:27:eb-2721f2efa5 on SSID-72f1f8be
+
+Sensors
+  sensor01     ch   36 (5180 MHz)  14:24:11 - 14:54:13  records   191007  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor02     ch   40 (5200 MHz)  14:24:11 - 14:54:14  records   188676  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor03     ch   44 (5220 MHz)  14:24:10 - 14:54:12  records   127295  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor04     ch   48 (5240 MHz)  14:24:12 - 14:54:14  records   126903  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor05     ch  149 (5745 MHz)  14:24:10 - 14:54:12  records   148483  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor06     ch  153 (5765 MHz)  14:24:12 - 14:54:14  records   104585  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor07     ch  157 (5785 MHz)  14:24:11 - 14:54:13  records   104773  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  sensor08     ch  161 (5805 MHz)  14:24:12 - 14:54:14  records   127131  bad_radiotap 0  bad_80211 0  truncated 0  eapol_cut_short 0
+  common window 14:24:12 - 14:54:12, start skew 2.3s
+
+Retry bit per sensor (median minute -> worst minute). Retries = retransmissions seen at the sensor,
+not receiver-side loss. broadcast_retry should be ~0 in real 802.11; if not, the dataset marks retries on
+broadcast frames and the unicast-only rate will under-report the event.
+If probe_resp is flat but all-frames jumps, the jump is a traffic-mix effect (more probe responses), not
+worse radio conditions.
+  sensor               unicast        all frames              mgmt        probe_resp         non-probe  bcast_retry
+  sensor01    30.2->31.6@14:31    4.6->9.9@14:27   4.7->10.3@14:27  31.3->32.9@14:45    0.0->8.9@14:25            0
+  sensor02    30.8->32.8@14:41    4.4->9.2@14:27    4.5->9.6@14:27  31.6->33.7@14:42    0.0->8.0@14:47            0
+  sensor03    29.8->31.7@14:47    4.2->9.5@14:27    4.3->9.9@14:27  31.3->33.1@14:47    0.0->5.9@14:29            0
+  sensor04    30.0->32.0@14:38    4.6->9.0@14:27    4.7->9.3@14:27  30.9->32.7@14:38    0.0->5.0@14:51            0
+  sensor05    30.2->32.2@14:49    4.7->9.7@14:27   4.8->10.0@14:27  31.1->33.5@14:49    0.0->7.1@14:38            0
+  sensor06    30.8->34.7@14:42    4.3->9.3@14:27    4.4->9.7@14:27  31.8->35.2@14:42    0.0->0.0@14:25            0
+  sensor07    30.5->33.0@14:51    4.2->9.1@14:27    4.3->9.4@14:27  31.8->34.4@14:51    0.0->5.9@14:39            0
+  sensor08    30.7->33.5@14:43    4.8->9.8@14:27   4.8->10.2@14:27  31.7->34.7@14:43    0.0->8.3@14:35            0
+
+Detected incidents (per-sensor robust baseline over the whole capture; partial edge minutes excluded)
+  14:26-14:28  probe_resp      environment-wide  8/8 sensors  peak 1286 vs baseline 455 on sensor07 (z=5.0)  bands 5GHz-low+5GHz-high  failed attempts 94/117, 64 clients
+  14:27-14:28  all_retry_rate  environment-wide  8/8 sensors  peak 0.0907 vs baseline 0.04221 on sensor07 (z=4.4)  bands 5GHz-low+5GHz-high  failed attempts 45/62, 44 clients
+  14:27-14:28  mgmt_retry_rate environment-wide  8/8 sensors  peak 0.09442 vs baseline 0.04313 on sensor07 (z=4.6)  bands 5GHz-low+5GHz-high  failed attempts 45/62, 44 clients
+  14:27-14:28  probe_req       environment-wide  7/8 sensors  peak 72 vs baseline 25 on sensor07 (z=6.3)  bands 5GHz-low+5GHz-high  failed attempts 45/62, 44 clients
+
+Outcome meanings: *_rejected / eap_failure = explicit refusal frame seen; stalled = no progress for 60s (no refusal seen); insufficient_observation = one frame only, not counted as failure;
+  probable_success_client_unheard = AP sent M3 but the sensor never heard the client (not a failure);
+  capture_gap = sensor stopped recording; in_progress_at_capture_end = cut off
+Connection attempts: 703  deauth_during_setup=643  probable_success_client_unheard=26  stalled=16  in_progress_at_capture_end=13  success=5
+  failure confidence: high=643  medium=16
+  first frame observed: ASSOC_RESP=545  AUTH_REQ=132  EAP_REQ=24  ASSOC_REQ=2
+    407  deauth_during_setup    EAP identity loop: AP never started EAP method (client not audible to sensor)  [code 23: 802.1X authentication failed]
+    108  deauth_during_setup    EAP identity loop: AP never started EAP method (client not audible to sensor)  [code 2: previous auth no longer valid]
+     95  deauth_during_setup    EAP identity loop: client answered, AP never started EAP method  [code 23: 802.1X authentication failed]
+     31  deauth_during_setup    EAP identity loop: client answered, AP never started EAP method  [code 2: previous auth no longer valid]
+     14  stalled                EAP identity loop: AP never started EAP method (client not audible to sensor)
+      2  deauth_during_setup    associated, no EAPOL  [code 2: previous auth no longer valid]
+      1  stalled                M1 sent, no M2
+      1  stalled                EAP identity loop: client answered, AP never started EAP method
+
+Disconnects outside a setup attempt (after success, or setup not seen): 1333
+   1047  DEAUTH by AP, reason 2 (previous auth no longer valid)  clients 12  APs 12  top AP 00:0b:86-dae30fdf22 x120  14:30:53-14:54:12
+    270  DISASSOC by AP, reason 2 (previous auth no longer valid)  clients 7  APs 7  top AP 00:0b:86-9d11e95964 x43  14:32:49-14:54:11
+     16  DEAUTH by client, reason 3 (leaving (deauth))  clients 15  APs 12  top AP 00:0b:86-734f7dc6c1 x2  14:24:13-14:36:32
+
+Disconnects per minute (all, deduplicated) - by reason
+  14:24  r2=   0  r3=  15
+  14:30  r2=   1  r3=   0
+  14:31  r2=  12  r3=   0
+  14:32  r2=  26  r3=   0
+  14:33  r2=  53  r3=   0
+  14:34  r2=  57  r3=   0
+  14:35  r2=  59  r3=   0
+  14:36  r2=  59  r3=   1
+  14:37  r2=  57  r3=   0
+  14:38  r2=  59  r3=   0
+  14:39  r2=  60  r3=   0
+  14:40  r2=  64  r3=   0
+  14:41  r2=  56  r3=   0
+  14:42  r2=  57  r3=   0
+  14:43  r2=  63  r3=   0
+  14:44  r2=  65  r3=   0
+  14:45  r2=  61  r3=   0
+  14:46  r2=  61  r3=   0
+  14:47  r2=  62  r3=   0
+  14:48  r2=  63  r3=   0
+  14:49  r2=  62  r3=   0
+  14:50  r2=  56  r3=   0
+  14:51  r2=  63  r3=   0
+  14:52  r2=  64  r3=   0
+  14:53  r2=  59  r3=   0
+  14:54  r2=  18  r3=   0
+
+Example timelines (full list in timelines.csv) - check these look like real sequences
+  [deauth_during_setup] client 3c:58:c2-1573a89e66 bssid 00:0b:86-dae30fdf22
+    14:24:23.023  AP->client  AUTH_RESP    alg=0 auth_seq=2 status=0
+    14:24:23.025  AP->client  ASSOC_RESP   status=0
+    14:24:23.026  AP->client  EAP_REQ      eap_code=1 eap_id=221 eap_type=1
+    14:24:53.034  AP->client  EAP_REQ      eap_code=1 eap_id=141 eap_type=1
+    14:25:23.042  AP->client  EAP_REQ      eap_code=1 eap_id=132 eap_type=1
+    14:25:23.052  AP->client  DEAUTH       reason=23
+    14:25:36.176  AP->client  AUTH_RESP    alg=0 auth_seq=2 status=0
+    14:25:36.182  AP->client  ASSOC_RESP   status=0
+    14:25:36.183  AP->client  EAP_REQ      eap_code=1 eap_id=18 eap_type=1
+  [stalled] client f0:18:98-8ddc6d3e6b bssid 00:0b:86-df7c557123
+    14:25:31.812  AP->client  AUTH_RESP    alg=0 auth_seq=2 status=0
+    14:25:31.817  AP->client  ASSOC_RESP   status=0
+    14:25:31.818  AP->client  EAP_REQ      eap_code=1 eap_id=115 eap_type=1
+  [success] client b8:27:eb-b44223116f bssid 00:0b:86-43b208a4a8
+    14:24:10.944  client->AP  AUTH_REQ     alg=0 auth_seq=1 status=0
+    14:24:10.944  AP->client  AUTH_RESP    alg=0 auth_seq=2 status=0
+    14:24:10.949  client->AP  ASSOC_REQ    
+    14:24:10.950  AP->client  ASSOC_RESP   status=0
+    14:24:10.982  AP->client  KEY_M1       key_msg=1 key_info=0x008a key_certain=True
+    14:24:10.983  client->AP  KEY_M2       key_msg=2 key_info=0x010a key_certain=True
+    14:24:10.984  AP->client  KEY_M3       key_msg=3 key_info=0x13ca key_certain=True
+    14:24:10.984  client->AP  KEY_M4       key_msg=4 key_info=0x030a key_certain=True
+    14:24:11.026  client->AP  DATA_PROT    
+    14:24:18.326  client->AP  DEAUTH       reason=3
+  [probable_success_client_unheard] client b8:27:eb-14d7d3df6a bssid 00:0b:86-543b0dc460
+    14:24:11.588  AP->client  AUTH_RESP    alg=0 auth_seq=2 status=0
+    14:24:11.589  AP->client  ASSOC_RESP   status=0
+    14:24:11.614  AP->client  KEY_M1       key_msg=1 key_info=0x008a key_certain=True
+    14:24:11.615  AP->client  KEY_M3       key_msg=3 key_info=0x13ca key_certain=True
+
+Clients with the most failures
+  3c:58:c2-ffa8f97013  failures 14/14  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-1aba9a6208  failures 13/13  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-4bab98f9a2  failures 13/13  EAP identity loop: client answered, AP never started EAP method (2: previous auth no longer valid)  bssids 1  sensors 1  signal -86
+  3c:58:c2-6aa6450e39  failures 13/13  EAP identity loop: client answered, AP never started EAP method (2: previous auth no longer valid)  bssids 1  sensors 1  signal -87
+  3c:58:c2-6d47d7524b  failures 13/13  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-84a3474d9a  failures 13/13  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-cb8be67ab4  failures 13/13  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-097b69888b  failures 12/12  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-10a409d205  failures 12/12  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+  3c:58:c2-1573a89e66  failures 12/12  EAP identity loop: AP never started EAP method (client not audible to sensor) (2: previous auth no longer valid)  bssids 1  sensors 1  signal None
+
+Failures per minute (all sensors, deduplicated)
+  14:24  attempts   23  failed   15  ###############
+  14:25  attempts   37  failed   37  #####################################
+  14:26  attempts   55  failed   49  #################################################
+  14:27  attempts   62  failed   45  #############################################
+  14:28  attempts   29  failed   29  #############################
+  14:29  attempts   42  failed   42  ##########################################
+  14:30  attempts   26  failed   26  ##########################
+  14:31  attempts   21  failed   21  #####################
+  14:32  attempts   27  failed   27  ###########################
+  14:33  attempts   25  failed   25  #########################
+  14:34  attempts   12  failed   12  ############
+  14:35  attempts   25  failed   25  #########################
+  14:36  attempts   32  failed   32  ################################
+  14:37  attempts   13  failed   13  #############
+  14:38  attempts   10  failed   10  ##########
+  14:39  attempts   29  failed   29  #############################
+  14:40  attempts   27  failed   27  ###########################
+  14:41  attempts    9  failed    9  #########
+  14:42  attempts   15  failed   15  ###############
+  14:43  attempts   25  failed   25  #########################
+  14:44  attempts   22  failed   22  ######################
+  14:45  attempts   11  failed   11  ###########
+  14:46  attempts    7  failed    7  #######
+  14:47  attempts   22  failed   22  ######################
+  14:48  attempts   21  failed   21  #####################
+  14:49  attempts   13  failed   13  #############
+  14:50  attempts   10  failed   10  ##########
+  14:51  attempts   16  failed   16  ################
+  14:52  attempts   16  failed   15  ###############
+  14:53  attempts   17  failed    9  #########
+  14:54  attempts    4  failed    0  
+

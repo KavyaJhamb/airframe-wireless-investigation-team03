@@ -1,0 +1,50 @@
+Sample cases: both engines against ground truth
+  tshark fast
+
+partial_credential_reject
+  PASS  PASS   each refused client has an 802.1X finding
+  PASS  PASS   not reported as network-wide (3 of 10)
+  PASS  PASS   the 7 good clients all connect, no findings
+
+sensor_gap
+  PASS  PASS   a sensor gap is not reported as silent APs
+  PASS  PASS   no congestion reported
+
+clock_skew_same_channel
+  PASS  PASS   one finding for the client, not two
+  PASS  PASS   3 attempts, not doubled
+
+spoofed_flood
+  PASS  PASS   flood is reported
+  PASS  PASS   does not claim the AP really sent it
+
+ping_pong_roam
+  PASS  PASS   no problem findings
+  PASS  PASS   all 10 joins succeed
+  PASS  PASS   9 roams recognised
+
+hidden_ssid_wrong_psk
+  PASS  PASS   wrong-passphrase client has a handshake finding
+  PASS  PASS   the other client connects, no findings
+
+randomized_mac_timeout
+  PASS  PASS   802.1X finding for the randomised-MAC client
+  PASS  PASS   masked output has no raw MAC or SSID
+
+mixed_incident
+  PASS  PASS   network-wide 802.1X finding covering the 6 clients
+  PASS  PASS   separate loop finding for the PSK client
+  PASS  PASS   congestion found on channel 44 only
+  PASS  PASS   healthy IoT devices: connected, no findings
+
+eap_ok_handshake_timeout
+  PASS  PASS   reported as a handshake failure
+  PASS  PASS   not reported as an 802.1X failure
+
+already_connected_then_leaves
+  PASS  PASS   no failure, no findings
+
+retry_mix_trap
+  PASS  PASS   no congestion from probe-response retries
+
+tshark: 24/24 pass  fast: 24/24 pass

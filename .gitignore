@@ -1,0 +1,7 @@
+*.pcap
+*.pcapng
+*.cap
+*.key
+.env
+.DS_Store
+__pycache__/

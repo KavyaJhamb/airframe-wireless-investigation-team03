@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Airframe: incident board and business case</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap">
+<style>
+:root {
+  --paper: #EEF1F4; --panel: #FFFFFF; --ink: #17202B; --muted: #5B6875; --rule: #D5DCE3;
+  --crit: #C8322B; --crit-soft: #F6DAD7; --serious: #B86A00; --serious-soft: #F7E6CC;
+  --info: #2F6DB5; --info-soft: #DCE8F6; --ok: #1E8A5A; --ok-soft: #D7EFE3; --iot: #8D9AA7;
+  --shadow: 0 1px 0 rgba(23, 32, 43, 0.06);
+  --font: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E141A; --panel: #161F28; --ink: #E6EBF0; --muted: #9AA7B4; --rule: #2A3643;
+    --crit: #FF6F64; --crit-soft: #3A1E1D; --serious: #F0A33A; --serious-soft: #3A2A12;
+    --info: #74A9F0; --info-soft: #172A40; --ok: #4CC38A; --ok-soft: #13301F; --iot: #6E7C89;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E141A; --panel: #161F28; --ink: #E6EBF0; --muted: #9AA7B4; --rule: #2A3643;
+  --crit: #FF6F64; --crit-soft: #3A1E1D; --serious: #F0A33A; --serious-soft: #3A2A12;
+  --info: #74A9F0; --info-soft: #172A40; --ok: #4CC38A; --ok-soft: #13301F; --iot: #6E7C89;
+  --shadow: none;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font);
+       font-size: 16px; line-height: 1.5; font-variation-settings: "wdth" 100; }
+img, svg { max-width: 100%; }
+a { color: var(--info); }
+:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+
+/* ---------- top bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper);
+       border-bottom: 1px solid var(--rule); }
+.bar-in { max-width: 1180px; margin: 0 auto; padding: 10px 20px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.brand { font-weight: 800; font-variation-settings: "wdth" 70; font-size: 1.35rem; letter-spacing: 0.01em; }
+.brand small { font-weight: 500; color: var(--muted); font-size: 0.8rem; margin-left: 8px; font-variation-settings: "wdth" 90; }
+nav { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; }
+nav button { font: inherit; font-size: 0.95rem; font-weight: 600; color: var(--muted); background: none; border: 0;
+             padding: 7px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+@media (max-width: 560px) { nav { margin-left: 0; width: 100%; justify-content: space-between; } nav button { padding: 7px 8px; font-size: 0.9rem; } }
+nav button[aria-selected="true"] { color: var(--ink); background: var(--panel); box-shadow: inset 0 -2px 0 var(--ink); }
+
+main { max-width: 1180px; margin: 0 auto; padding: 8px 20px 60px; }
+.view { display: none; }
+.view.on { display: block; }
+h1 { font-size: clamp(2rem, 5.4vw, 3.4rem); line-height: 1.02; margin: 28px 0 12px; font-weight: 780;
+     font-variation-settings: "wdth" 72; max-width: 18ch; }
+h2 { font-size: 1.45rem; margin: 44px 0 6px; font-weight: 720; font-variation-settings: "wdth" 80; }
+h3 { font-size: 1.05rem; margin: 0 0 6px; font-weight: 680; font-variation-settings: "wdth" 88; }
+p { margin: 0 0 12px; }
+.lede { font-size: 1.12rem; max-width: 64ch; color: var(--ink); }
+.sub { color: var(--muted); max-width: 70ch; }
+.small { font-size: 0.86rem; color: var(--muted); }
+
+/* ---------- readout strip */
+.readout { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--ink);
+           border-bottom: 1px solid var(--rule); margin: 22px 0 8px; }
+.readout div { padding: 12px 14px 12px 0; }
+.readout div + div { padding-left: 14px; border-left: 1px solid var(--rule); }
+.readout b { display: block; font-size: 2rem; line-height: 1.05; font-weight: 760; font-variation-settings: "wdth" 66; }
+.readout span { font-size: 0.88rem; color: var(--muted); }
+.readout .c b { color: var(--crit); }
+.readout .s b { color: var(--serious); }
+@media (max-width: 720px) { .readout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .readout div:nth-child(3) { padding-left: 0; border-left: 0; } .readout div:nth-child(n+3) { border-top: 1px solid var(--rule); } }
+
+/* ---------- panels */
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; box-shadow: var(--shadow); }
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tape { min-width: 860px; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.hint { display: none; font-size: 0.8rem; color: var(--muted); margin: 6px 0 0; }
+@media (max-width: 760px) { .hint { display: block; } }
+
+/* ---------- findings */
+.findings { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.finding { display: grid; grid-template-columns: 112px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.sev { font-weight: 700; font-size: 0.9rem; font-variation-settings: "wdth" 80; }
+.sev em { display: block; font-style: normal; font-weight: 500; color: var(--muted); font-size: 0.82rem; }
+.sev.crit { color: var(--crit); } .sev.serious { color: var(--serious); } .sev.info { color: var(--info); }
+.sev.low { color: var(--muted); } .sev.ok { color: var(--ok); }
+.finding p { margin: 4px 0 8px; max-width: 76ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.86rem; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 600; }
+@media (max-width: 600px) { .finding { grid-template-columns: 1fr; gap: 4px; } }
+
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 7px 8px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 650; color: var(--muted); font-size: 0.84rem; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.seq td:first-child { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.seq .ap td:nth-child(2) { color: var(--info); }
+.seq .cl td:nth-child(2) { color: var(--ok); }
+.seq .bad td { color: var(--crit); font-weight: 600; }
+
+/* ---------- use case */
+.story { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 820px) { .story { grid-template-columns: 1fr; } }
+.story ol { margin: 0; padding: 0; list-style: none; }
+.story li { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--rule); }
+.story li time { font-variant-numeric: tabular-nums; font-weight: 650; }
+.before h3 { color: var(--muted); } .after h3 { color: var(--ok); }
+.tag { display: inline-block; font-size: 0.78rem; padding: 1px 7px; border-radius: 4px; font-weight: 600; margin-right: 6px; }
+.tag.m { background: var(--ok-soft); color: var(--ok); } .tag.a { background: var(--rule); color: var(--muted); }
+.who { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .who { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .who { grid-template-columns: 1fr; } }
+.who div { border-top: 2px solid var(--ink); padding-top: 10px; }
+
+/* ---------- savings */
+.calc { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .calc { grid-template-columns: 1fr; } }
+@media (min-width: 901px) { .calc > .panel:last-child { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); } }
+fieldset { border: 0; margin: 0 0 14px; padding: 0; }
+legend { font-weight: 700; font-variation-settings: "wdth" 85; margin-bottom: 4px; padding: 0; }
+.in { display: grid; grid-template-columns: 1fr 92px; gap: 2px 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--rule); }
+.in label { font-size: 0.92rem; }
+.in output { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.in input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); }
+.in .src { grid-column: 1 / -1; font-size: 0.78rem; color: var(--muted); }
+.total { border-top: 2px solid var(--ink); padding-top: 10px; }
+.total b { display: block; font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 780; font-variation-settings: "wdth" 66; line-height: 1; }
+.rows { margin-top: 14px; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 8px 0; border-top: 1px solid var(--rule); font-size: 0.93rem; }
+.row .barw { grid-column: 1 / -1; height: 8px; background: var(--rule); border-radius: 4px; overflow: hidden; }
+.row .barw span { display: block; height: 100%; border-radius: 4px; }
+.caveat { border-left: 3px solid var(--serious); padding: 8px 12px; background: var(--serious-soft); border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 0.93rem; }
+.presets { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 14px; }
+.presets button { font: inherit; font-size: 0.88rem; font-weight: 600; border: 1px solid var(--rule); background: var(--panel);
+                  color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.presets button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+
+/* ---------- method */
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+.steps li { counter-increment: s; border-top: 2px solid var(--ink); padding-top: 10px; }
+.steps li::before { content: counter(s); font-weight: 800; font-size: 1.6rem; font-variation-settings: "wdth" 62; display: block; line-height: 1; margin-bottom: 4px; }
+footer { color: var(--muted); font-size: 0.84rem; margin-top: 40px; border-top: 1px solid var(--rule); padding-top: 12px; }
+@media (prefers-reduced-motion: no-preference) { .view.on { animation: rise .25s ease-out; } @keyframes rise { from { opacity: .4; } to { opacity: 1; } } }
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <div class="brand">Airframe<small>header-only Wi-Fi fault finder</small></div>
+  <nav role="tablist" aria-label="Sections">
+    <button role="tab" data-view="incident" aria-selected="true">Incident</button>
+    <button role="tab" data-view="usecase" aria-selected="false">Use case</button>
+    <button role="tab" data-view="savings" aria-selected="false">Savings</button>
+    <button role="tab" data-view="method" aria-selected="false">How it works</button>
+  </nav>
+</div></header>
+
+<main>
+<!-- ================================================================ INCIDENT -->
+<section class="view on" id="v-incident" data-view="incident" role="tabpanel">
+  <h1>The Wi‑Fi didn’t break. The login server did.</h1>
+  <p class="lede">Eight passive sensors listened to one production hall for 30 minutes. Every client on the 802.1X network failed to log in, on every access point and every channel, while the IoT devices on the PSK network connected. Replaying the captures, Airframe sent the right alert to the right team 5 seconds after the first failed login.</p>
+
+  <div class="readout" aria-label="Key numbers">
+    <div class="c"><b>63 of 63</b><span>802.1X clients never logged in</span></div>
+    <div class="c"><b>5 s</b><span>from first failed login to alert</span></div>
+    <div class="s"><b>18</b><span>devices kicked every 11–30 s from 14:30:53</span></div>
+    <div><b>0</b><span>radio faults found; the retry spike is traffic mix</span></div>
+  </div>
+  <p class="small">1,118,853 header-only frames, 8 sensors on 8 channels, 29 access points, 99 clients, 14:24–14:54 (Paris time). Device and network names are masked.</p>
+
+  <h2>Incident tape</h2>
+  <p class="sub">One column per minute, all sensors merged. The red line is when the first alert fired; the amber line is the second.</p>
+  <div class="panel">
+    <div class="scroll-x"><svg class="tape" id="tape" viewBox="0 0 1000 520" role="img" aria-label="Per-minute timeline of failed logins, rejections, probe requests and retry share"></svg></div>
+    <p class="hint">Swipe sideways to see the whole half hour.</p>
+    <div class="legend">
+      <span><i style="background:var(--crit)"></i>failed join attempts</span>
+      <span><i style="background:var(--ok)"></i>successful joins</span>
+      <span><i style="background:var(--serious)"></i>AP rejections, reason 2</span>
+      <span><i style="background:var(--info)"></i>office device probe requests (Intel, Apple)</span>
+      <span><i style="background:var(--iot)"></i>IoT probe requests (Raspberry Pi)</span>
+    </div>
+  </div>
+
+  <h2>Findings, ranked</h2>
+  <p class="sub">Each finding names what was observed, who owns it and the first check to run. Anything the captures cannot prove is said so.</p>
+  <ul class="findings">
+    <li class="finding">
+      <div class="sev crit">Critical<em>alert 14:25:28</em></div>
+      <div>
+        <h3>802.1X logins stall at the Identity step, site‑wide</h3>
+        <p>The APs only ever send Identity requests and never start the login method. Every client the sensors could hear answered (129 of 129 attempts), so the APs are not getting a reply from the authentication server. After 3 tries, 30 s apart, the AP gives up with reason 23. No EAP‑Success frame appears anywhere.</p>
+        <div class="meta"><span><b>63</b> clients</span><span><b>26</b> APs</span><span><b>8 of 8</b> channels</span><span><b>502</b> attempts ended by timeout, <b>139</b> cut short by the rejection wave</span></div>
+        <div class="meta"><span>Owner: <b>identity / RADIUS team</b></span><span>First check: <b>RADIUS logs and controller‑to‑RADIUS reachability</b></span><span>Not proven: which component failed</span></div>
+      </div>
+    </li>
+    <li class="finding">
+      <div class="sev serious">Serious<em>alert 14:31:51</em></div>
+      <div>
+        <h3>Rejection wave: APs keep kicking one device group</h3>
+        <p>From 14:30:53 the APs tell 18 clients their session is no longer valid (reason 2), every 11–30 s, until the capture ends. Each client is always rejected by the same AP, and all 18 share one vendor prefix (Intel). None of them tries another AP, although other APs on the same network answer their probes.</p>
+        <div class="meta"><span><b>1,458</b> reason‑2 frames</span><span><b>18</b> clients on <b>18</b> APs</span><span>detected <b>58 s</b> after onset</span></div>
+        <div class="meta"><span>Owner: <b>WLAN controller team</b></span><span>First check: <b>controller events at 14:30:53, and why one device group</b></span></div>
+      </div>
+    </li>
+    <li class="finding">
+      <div class="sev info">Explained<em>14:26–14:28</em></div>
+      <div>
+        <h3>Probe storm and retry spike are symptoms, not a radio problem</h3>
+        <p>Office devices’ probe requests climb to 414 a minute at 14:27, in step with clients hitting their first login timeout (61 of 63 by 14:28): they are rescanning for a better AP. IoT devices rejoining in the same two minutes add a little more. The all‑frame retry rate doubles to 9.5%, but probe responses are retried about 31% of the time in every minute. More of them in the mix raises the average; radio conditions did not change.</p>
+        <div class="meta"><span>Owner: <b>none</b></span><span>Action: <b>the RF team can stand down</b></span></div>
+      </div>
+    </li>
+    <li class="finding">
+      <div class="sev low">Medium<em>design</em></div>
+      <div>
+        <h3>Channels 36 and 40 carry 5 APs each</h3>
+        <p>Most other channels carry 3. Everything on those two channels shares the same airtime, and beacons alone use more of it. A channel re‑plan is a configuration change, not a hardware purchase.</p>
+        <div class="meta"><span>Owner: <b>WLAN design</b></span></div>
+      </div>
+    </li>
+    <li class="finding">
+      <div class="sev ok">Healthy<em>PSK network</em></div>
+      <div>
+        <h3>The IoT network kept working</h3>
+        <p>All 31 successful joins in the capture were Raspberry Pi devices on the PSK network (23 devices). One of them stopped after key message 1 at 14:27 and did not retry: worth a look by the device team.</p>
+      </div>
+    </li>
+  </ul>
+
+  <h2>Evidence</h2>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Failed attempts by sensor and minute</h3>
+      <p class="small">Failures on all 8 channels in nearly every minute: the cause is shared, not local to one area.</p>
+      <div class="scroll-x"><svg id="heat" viewBox="0 0 640 290" style="min-width:520px;display:block" role="img" aria-label="Heatmap of failed join attempts per sensor and minute"></svg></div>
+    </div>
+    <div class="panel">
+      <h3>One client, one identity loop</h3>
+      <p class="small" id="exlabel"></p>
+      <div class="scroll-x"><table class="seq" id="seq"><thead><tr><th>Time</th><th>Direction</th><th>Frame</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h3>Access points per channel</h3>
+      <svg id="chans" viewBox="0 0 520 220" role="img" aria-label="Access points per channel"></svg>
+    </div>
+    <div class="panel">
+      <h3>What each sensor can hear</h3>
+      <p class="small">“AP side only” is the share of join attempts where the sensor heard the AP but never heard the client transmit. Sensors 01, 05 and 06 almost never hear clients directly: candidates for repositioning.</p>
+      <div class="scroll-x"><table id="vis"><thead><tr><th>Sensor</th><th class="num">Channel</th><th class="num">APs</th><th class="num">Clients in frames</th><th class="num">AP side only</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ USE CASE -->
+<section class="view" id="v-usecase" data-view="usecase" role="tabpanel">
+  <h1>From “Wi‑Fi is down” to the right team in seconds</h1>
+  <p class="lede">Tesla already runs a fleet of passive sensors that capture 802.11 headers. Airframe turns those captures into ranked, owned incidents: what broke, where in the login sequence, how many devices, and which team should look first. No payloads, no transmitting, no new hardware.</p>
+
+  <h2>The same half hour, twice</h2>
+  <p class="sub">The right column uses times measured from the captures. The left column is a typical response without Airframe, based on how Wi‑Fi incidents usually unfold; it is illustrative, not measured.</p>
+  <div class="story">
+    <div class="panel before">
+      <h3>Without Airframe</h3>
+      <ol>
+        <li><time>14:25</time><div>Laptops and phones start failing to log in. Users retry, restart, walk to a different spot.</div></li>
+        <li><time>14:27</time><div>Monitoring shows retries doubling. The RF team starts looking for interference: a red herring.</div></li>
+        <li><time>~14:40</time><div>Tickets reach the helpdesk: “Wi‑Fi down in the hall.” The network team is paged.</div></li>
+        <li><time>~15:00+</time><div>War room with RF, controller and identity teams. Someone eventually checks the RADIUS server.</div></li>
+      </ol>
+    </div>
+    <div class="panel after">
+      <h3>With Airframe</h3>
+      <ol>
+        <li><time>14:25:28</time><div><span class="tag m">measured</span>Critical alert to the identity team: logins stall at the Identity step on 26 APs; clients answer; check RADIUS.</div></li>
+        <li><time>14:28</time><div><span class="tag m">measured</span>The probe storm and retry spike are tagged as symptoms of the failed logins, not a radio fault. No reason to page the RF team.</div></li>
+        <li><time>14:31:51</time><div><span class="tag m">measured</span>Serious alert to the controller team: 18 devices of one group kicked every 11–30 s since 14:30:53.</div></li>
+        <li><time>next</time><div><span class="tag a">outcome</span>Two teams each work one clear problem, with the evidence attached and the example client to open.</div></li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>Who uses it</h2>
+  <div class="who">
+    <div><h3>Wireless operations</h3><p class="small">Watches the incident board. Gets one merged incident per problem, not one alarm per sensor.</p></div>
+    <div><h3>Identity / RADIUS</h3><p class="small">Receives login‑path alerts with the stage that failed and whether clients answered.</p></div>
+    <div><h3>Controller team</h3><p class="small">Receives disconnect waves with onset time, reason code, affected APs and device groups.</p></div>
+    <div><h3>Plant IT and production</h3><p class="small">Sees which device groups are affected, and whether production networks are healthy.</p></div>
+  </div>
+
+  <h2>Why it can be trusted</h2>
+  <div class="grid3">
+    <div class="panel"><h3>Judgment built in</h3><p class="small">A roam is not a failure. One client heard by several sensors is one finding. A capture that ends mid‑join is not a failure. Each rule has a test.</p></div>
+    <div class="panel"><h3>Honest about blind spots</h3><p class="small">When a sensor hears only the AP, the finding says so. “Observed”, “consistent with” and “not proven” are kept apart in every alert.</p></div>
+    <div class="panel"><h3>Private by design</h3><p class="small">MAC addresses and network names are replaced with salted hashes before analysis. Login identities are never read.</p></div>
+  </div>
+</section>
+
+<!-- ================================================================ SAVINGS -->
+<section class="view" id="v-savings" data-view="savings" role="tabpanel">
+  <h1>What faster answers are worth</h1>
+  <p class="lede">Airframe saves money in one way: it shortens the time between “something broke” and “the right team is fixing the right thing”. The value of that time depends on who is offline. Move the sliders to match a site.</p>
+
+  <div class="caveat"><b>What the captures cannot tell us:</b> there is no application data, so business impact is modelled, not measured. In this incident the affected devices were Intel and Apple clients on the 802.1X network, most likely laptops and phones; the IoT network kept working. The production‑line figure is therefore off by default.</div>
+
+  <h2>This incident, as captured</h2>
+  <div class="readout">
+    <div class="c"><b id="t_hours">30 h</b><span>device‑hours locked out in 30 minutes</span></div>
+    <div class="s"><b>6.4 h</b><span>device‑hours inside the rejection wave</span></div>
+    <div class="c"><b id="t_cost">$2,100</b><span>of lost working time so far, at the rate below</span></div>
+    <div><b id="t_shift">$35,300</b><span>if it runs a full 8‑hour shift unnoticed</span></div>
+  </div>
+
+  <h2>Per year</h2>
+  <div class="presets" role="group" aria-label="Scenarios">
+    <button type="button" data-preset="office" aria-pressed="true">Like this incident</button>
+    <button type="button" data-preset="mixed" aria-pressed="false">Some production devices affected</button>
+    <button type="button" data-preset="multi" aria-pressed="false">Six sites</button>
+  </div>
+  <div class="calc">
+    <div class="panel" id="inputs"></div>
+    <div class="panel">
+      <div class="total"><span class="small">Estimated savings per year</span><b id="total">$0</b><span class="small" id="perinc"></span></div>
+      <div class="rows" id="rows"></div>
+      <p class="small" id="sens" style="margin-top:14px"></p>
+      <p class="small">Compute cost is negligible by comparison: analysing all 8 sensors’ 30 minutes takes about 4.5 seconds on one core, about 250,000 frames per second. At this site’s traffic, one core keeps up with roughly 3,000 sensors.</p>
+    </div>
+  </div>
+
+  <h2>Where the money comes from</h2>
+  <div class="grid2">
+    <div class="panel"><h3>People back to work sooner</h3><p class="small">Every minute cut from detection and diagnosis is a minute fewer for every affected user. Here, 63 people.</p></div>
+    <div class="panel"><h3>Less engineering time in war rooms</h3><p class="small">The alert names the owner and the first check, so fewer engineers spend less time triaging.</p></div>
+    <div class="panel"><h3>No chasing the wrong cause</h3><p class="small">In a 2016 ZK Research survey of 100 network administrators, Wi‑Fi was reported as the cause 64% of the time but was the root cause only 40% of the time. Here the retry spike pointed at the radio; the real cause was the login server.</p></div>
+    <div class="panel"><h3>Production protected, when it applies</h3><p class="small">Siemens’ True Cost of Downtime 2024 puts an idle automotive line at $2.3 million per hour. If a login failure ever reaches scanners, robots or vehicles, each minute saved is worth about $38,000 at full stop.</p></div>
+  </div>
+  <p class="small" style="margin-top:14px">Sources: Siemens, <i>The True Cost of Downtime 2024</i> (automotive, $2.3 M per idle line hour). ZK Research survey of 100 network administrators, 2016 (Wi‑Fi blamed 64%, root cause 40%; most Wi‑Fi issues take over 30 minutes to diagnose and resolve). All other defaults are assumptions and can be changed.</p>
+</section>
+
+<!-- ================================================================ METHOD -->
+<section class="view" id="v-method" data-view="method" role="tabpanel">
+  <h1>How it works</h1>
+  <p class="lede">Header‑only captures in, ranked incidents out. The best of two independent implementations, cross‑checked against each other and against 32 test captures.</p>
+  <ol class="steps">
+    <li><h3>Read and mask</h3><p class="small">Parse 802.11 and 802.1X headers from every sensor. Replace MACs and network names with salted hashes first.</p></li>
+    <li><h3>Rebuild every join</h3><p class="small">Merge sensors per client and replay auth, association, 802.1X and the key handshake. Record where each attempt stopped and why.</p></li>
+    <li><h3>Judge, then group</h3><p class="small">Separate roams, client exits and capture edges from real failures. Roll failures up into one incident per shared cause.</p></li>
+    <li><h3>Route the alert</h3><p class="small">Send each incident to its owner with the evidence, the first check, a confidence level and what is not proven.</p></li>
+  </ol>
+
+  <h2>Two independent tools, same answers</h2>
+  <p class="sub">One implementation uses Wireshark’s dissector; the other parses frames from scratch. They agree on every headline number.</p>
+  <div class="panel scroll-x">
+    <table>
+      <thead><tr><th>Headline</th><th class="num">From‑scratch parser</th><th class="num">Wireshark‑based</th></tr></thead>
+      <tbody>
+        <tr><td>802.1X clients failing, APs affected</td><td class="num">63, 26</td><td class="num">63, 26</td></tr>
+        <tr><td>Successful joins</td><td class="num">5 confirmed + 26 probable</td><td class="num">31</td></tr>
+        <tr><td>Still in progress at capture end</td><td class="num">13</td><td class="num">13</td></tr>
+        <tr><td>Reason‑2 disconnect frames</td><td class="num">1,317 + 141 = 1,458</td><td class="num">1,458</td></tr>
+        <tr><td>Clients in the rejection wave</td><td class="num">18</td><td class="num">18</td></tr>
+        <tr><td>IoT handshake stuck at message 1</td><td class="num">1</td><td class="num">1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Tested beyond this dataset</h2>
+  <div class="grid3">
+    <div class="panel"><h3>16 real captures</h3><p class="small">Public Wireshark and aircrack‑ng test captures: WEP, WPA2, PMF, WPA3, OWE, EAP‑TLS and Suite‑B, three header formats, broken timestamps and a disassociation flood.</p></div>
+    <div class="panel"><h3>16 scenarios with known answers</h3><p class="small">Generated multi‑sensor captures: roam vs loop, the same event on two sensors, wrong passphrase, full AP, silent AP, congestion and a network‑wide login failure.</p></div>
+    <div class="panel"><h3>Privacy checked</h3><p class="small">For every scenario, the tests search all outputs for the raw MACs and network names used to generate it. None may appear.</p></div>
+  </div>
+
+  <h2>At scale</h2>
+  <p class="sub">Sensors do the header extraction and send compact events, not captures. Each site correlates its own sensors by client, keeps summaries for everything and raw headers only around incidents. Alerts go to owners; a heartbeat from every sensor tells silent sensors apart from quiet air.</p>
+  <footer>Data: 8 sensor captures, 14:24–14:54 local time. All device and network identifiers are masked. Business figures are estimates; see the Savings tab for sources and assumptions.</footer>
+</section>
+</main>
+
+<script>
+const D = {"labels": ["14:24", "14:25", "14:26", "14:27", "14:28", "14:29", "14:30", "14:31", "14:32", "14:33", "14:34", "14:35", "14:36", "14:37", "14:38", "14:39", "14:40", "14:41", "14:42", "14:43", "14:44", "14:45", "14:46", "14:47", "14:48", "14:49", "14:50", "14:51", "14:52", "14:53", "14:54"], "partial": [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true], "fail": [15, 37, 49, 45, 29, 42, 26, 21, 27, 25, 12, 25, 32, 13, 10, 29, 27, 9, 15, 25, 22, 11, 7, 22, 21, 13, 10, 16, 15, 9, 0], "ok": [8, 0, 6, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "r2": [0, 0, 0, 0, 0, 0, 1, 12, 26, 53, 57, 59, 59, 57, 59, 60, 64, 56, 57, 63, 65, 61, 61, 62, 63, 62, 56, 63, 64, 59, 18], "probe_l": [99, 269, 349, 414, 361, 292, 273, 228, 207, 194, 147, 228, 184, 242, 110, 213, 229, 149, 160, 137, 176, 164, 92, 133, 193, 119, 146, 103, 132, 169, 12], "probe_i": [0, 0, 46, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "first_timeout": [0, 15, 26, 20, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "retry_all": [2.63, 5.59, 8.0, 9.47, 7.21, 7.13, 6.84, 5.28, 5.01, 5.52, 4.49, 4.14, 5.5, 4.94, 2.91, 4.27, 5.48, 4.08, 3.34, 4.16, 4.68, 3.82, 2.19, 3.69, 4.82, 3.24, 3.33, 3.07, 3.37, 4.04, 3.29], "retry_presp": [31.96, 31.04, 30.69, 31.29, 31.08, 31.51, 31.67, 31.43, 31.03, 31.83, 31.37, 30.65, 31.45, 31.28, 31.05, 31.2, 31.14, 31.48, 31.95, 31.77, 31.13, 31.51, 31.35, 30.81, 31.83, 31.2, 31.9, 31.78, 31.24, 31.08, 32.29], "sensors": [{"name": "sensor01", "ch": 36}, {"name": "sensor02", "ch": 40}, {"name": "sensor03", "ch": 44}, {"name": "sensor04", "ch": 48}, {"name": "sensor05", "ch": 149}, {"name": "sensor06", "ch": 153}, {"name": "sensor07", "ch": 157}, {"name": "sensor08", "ch": 161}], "heat": [[4, 8, 9, 9, 4, 11, 4, 3, 7, 5, 2, 6, 6, 3, 3, 4, 7, 1, 2, 5, 5, 4, 1, 4, 6, 1, 2, 3, 5, 0, 0], [1, 5, 8, 7, 5, 7, 4, 2, 5, 4, 2, 3, 4, 3, 1, 5, 4, 1, 3, 1, 5, 1, 0, 4, 2, 3, 2, 1, 3, 1, 0], [2, 5, 6, 5, 4, 4, 4, 3, 2, 5, 0, 4, 4, 2, 1, 3, 5, 0, 3, 3, 3, 1, 1, 2, 5, 0, 3, 1, 1, 1, 0], [1, 4, 6, 6, 3, 3, 3, 3, 2, 3, 2, 1, 6, 0, 0, 3, 4, 1, 1, 2, 3, 2, 0, 2, 1, 3, 1, 2, 2, 0, 0], [3, 5, 7, 7, 5, 5, 4, 4, 3, 3, 3, 4, 4, 2, 1, 5, 3, 2, 3, 4, 2, 1, 2, 4, 3, 2, 0, 3, 1, 2, 0], [1, 3, 4, 2, 2, 4, 2, 2, 2, 2, 1, 2, 2, 1, 1, 3, 2, 1, 0, 4, 1, 0, 0, 3, 1, 1, 1, 2, 2, 1, 0], [1, 3, 4, 3, 3, 4, 1, 2, 2, 1, 2, 1, 3, 1, 1, 2, 1, 2, 0, 2, 2, 1, 1, 1, 2, 1, 0, 2, 0, 2, 0], [2, 4, 5, 6, 3, 4, 4, 2, 4, 2, 0, 4, 3, 1, 2, 4, 1, 1, 3, 4, 1, 1, 2, 2, 1, 2, 1, 2, 1, 2, 0]], "outcomes": {"deauth_during_setup": 643, "probable_success_client_unheard": 26, "stalled": 16, "in_progress_at_capture_end": 13, "success": 5}, "aps_per_channel": {"36": 5, "40": 5, "44": 3, "48": 3, "149": 4, "153": 3, "157": 3, "161": 3}, "example": {"label": "C-155344", "rows": [["14:24:14", "client->AP", "DEAUTH", "3"], ["14:24:43", "client->AP", "AUTH_REQ", ""], ["14:24:43", "AP->client", "AUTH_RESP", ""], ["14:24:43", "client->AP", "ASSOC_REQ", ""], ["14:24:43", "AP->client", "ASSOC_RESP", ""], ["14:24:43", "AP->client", "EAP_REQ", ""], ["14:24:43", "client->AP", "EAP_RESP", ""], ["14:25:13", "AP->client", "EAP_REQ", ""], ["14:25:13", "client->AP", "EAP_RESP", ""], ["14:25:43", "AP->client", "EAP_REQ", ""], ["14:25:43", "AP->client", "DEAUTH", "23"], ["14:25:56", "client->AP", "AUTH_REQ", ""], ["14:25:56", "AP->client", "AUTH_RESP", ""], ["14:25:56", "client->AP", "ASSOC_REQ", ""], ["14:25:56", "AP->client", "ASSOC_RESP", ""], ["14:25:56", "AP->client", "EAP_REQ", ""], ["14:25:56", "client->AP", "EAP_RESP", ""], ["14:26:26", "AP->client", "EAP_REQ", ""], ["14:26:26", "client->AP", "EAP_RESP", ""], ["14:26:56", "AP->client", "EAP_REQ", ""], ["14:26:56", "client->AP", "EAP_RESP", ""], ["14:26:56", "AP->client", "DEAUTH", "23"], ["14:27:34", "client->AP", "AUTH_REQ", ""], ["14:27:34", "AP->client", "AUTH_RESP", ""], ["14:27:34", "client->AP", "ASSOC_REQ", ""], ["14:27:34", "AP->client", "ASSOC_RESP", ""], ["14:27:34", "AP->client", "EAP_REQ", ""], ["14:27:34", "client->AP", "EAP_RESP", ""], ["14:28:04", "AP->client", "EAP_REQ", ""], ["14:28:04", "client->AP", "EAP_RESP", ""]]}, "offline_device_min": 1805, "wave_client_min": 382, "sensor_vis": [{"sensor": "sensor01", "aps_heard": 5, "clients_heard": 37, "one_sided_attempts": 1.0}, {"sensor": "sensor02", "aps_heard": 5, "clients_heard": 35, "one_sided_attempts": 0.667}, {"sensor": "sensor03", "aps_heard": 3, "clients_heard": 31, "one_sided_attempts": 0.719}, {"sensor": "sensor04", "aps_heard": 3, "clients_heard": 31, "one_sided_attempts": 0.571}, {"sensor": "sensor05", "aps_heard": 4, "clients_heard": 34, "one_sided_attempts": 0.99}, {"sensor": "sensor06", "aps_heard": 3, "clients_heard": 29, "one_sided_attempts": 1.0}, {"sensor": "sensor07", "aps_heard": 3, "clients_heard": 32, "one_sided_attempts": 0.464}, {"sensor": "sensor08", "aps_heard": 3, "clients_heard": 32, "one_sided_attempts": 0.844}]};
+const $ = (s, r = document) => r.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt$ = v => '$' + Math.round(v).toLocaleString('en-US');
+
+/* ---------------- tabs */
+function show(view) {
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.dataset.view === view));
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === view));
+  if (location.hash.slice(1) !== view) history.replaceState(null, '', '#' + view);
+  window.scrollTo({ top: 0 });
+}
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => show(b.dataset.view)));
+const start = location.hash.slice(1);
+if (['incident', 'usecase', 'savings', 'method'].includes(start)) show(start);
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (['incident', 'usecase', 'savings', 'method'].includes(h)) show(h); });
+
+/* ---------------- incident tape */
+function drawTape() {
+  const svg = $('#tape'); svg.innerHTML = '';
+  const n = D.labels.length, L = 170, R = 12, W = 1000 - L - R, cw = W / n;
+  const x = i => L + i * cw;
+  const lanes = [
+    { key: 'joins', title: 'Join attempts', sub: 'failed and successful', h: 110 },
+    { key: 'first', title: 'First login timeout', sub: 'clients reaching it', h: 60 },
+    { key: 'r2', title: 'AP rejections', sub: 'reason 2, per minute', h: 80 },
+    { key: 'probe', title: 'Probe requests', sub: 'office and IoT devices', h: 90 },
+    { key: 'retry', title: 'Retry share', sub: 'all frames vs probe resp.', h: 90 },
+  ];
+  let y = 10;
+  const total = 10 + lanes.reduce((a, l) => a + l.h + 14, 0);
+  const ink = css('--ink'), muted = css('--muted'), rule = css('--rule');
+  // info band 14:26-14:28
+  el('rect', { x: x(2), y: 0, width: 2 * cw, height: total - 8, fill: css('--info-soft'), opacity: 0.8 }, svg);
+  for (const lane of lanes) {
+    const g = el('g', {}, svg);
+    const t = el('text', { x: 0, y: y + 16, fill: ink, 'font-size': 14, 'font-weight': 650 }, g); t.textContent = lane.title;
+    const s = el('text', { x: 0, y: y + 33, fill: muted, 'font-size': 12 }, g); s.textContent = lane.sub;
+    el('line', { x1: L, x2: 1000 - R, y1: y + lane.h, y2: y + lane.h, stroke: rule }, g);
+    const base = y + lane.h, top = y + 6, H = lane.h - 8;
+    const op = i => (D.partial[i] ? 0.45 : 1);
+    if (lane.key === 'joins') {
+      const mx = Math.max(...D.fail, ...D.ok);
+      D.fail.forEach((v, i) => { const h = H * v / mx; el('rect', { x: x(i) + cw * 0.1, y: base - h, width: cw * 0.42, height: h, fill: css('--crit'), opacity: op(i) }, g); });
+      D.ok.forEach((v, i) => { if (!v) return; const h = H * v / mx; el('rect', { x: x(i) + cw * 0.52, y: base - h, width: cw * 0.38, height: h, fill: css('--ok'), opacity: op(i) }, g); });
+      const lb = el('text', { x: 0, y: y + 49, fill: muted, 'font-size': 11 }, g); lb.textContent = `peak ${mx} a minute`;
+    } else if (lane.key === 'first' || lane.key === 'r2') {
+      const arr = lane.key === 'first' ? D.first_timeout : D.r2, mx = Math.max(...arr) || 1;
+      const col = lane.key === 'first' ? css('--crit') : css('--serious');
+      arr.forEach((v, i) => { const h = H * v / mx; el('rect', { x: x(i) + cw * 0.15, y: base - h, width: cw * 0.7, height: h, fill: col, opacity: (lane.key === 'first' ? 0.75 : 1) * op(i) }, g); });
+      const lb = el('text', { x: 0, y: y + 49, fill: muted, 'font-size': 11 }, g); lb.textContent = `peak ${mx} a minute`;
+    } else if (lane.key === 'probe') {
+      const tot = D.probe_l.map((v, i) => v + D.probe_i[i]), mx = Math.max(...tot);
+      D.probe_l.forEach((v, i) => {
+        const h1 = H * v / mx, h2 = H * D.probe_i[i] / mx;
+        el('rect', { x: x(i) + cw * 0.15, y: base - h1, width: cw * 0.7, height: h1, fill: css('--info'), opacity: op(i) }, g);
+        if (h2) el('rect', { x: x(i) + cw * 0.15, y: base - h1 - h2, width: cw * 0.7, height: h2, fill: css('--iot'), opacity: op(i) }, g);
+      });
+      const lb = el('text', { x: 0, y: y + 49, fill: muted, 'font-size': 11 }, g); lb.textContent = `peak ${mx} a minute`;
+    } else {
+      const mx = 35, py = v => base - H * v / mx;
+      [10, 20, 30].forEach(v => { el('line', { x1: L, x2: 1000 - R, y1: py(v), y2: py(v), stroke: rule, 'stroke-dasharray': '2 4' }, g);
+        const tl = el('text', { x: L - 6, y: py(v) + 4, 'text-anchor': 'end', fill: muted, 'font-size': 11 }, g); tl.textContent = v + '%'; });
+      const path = arr => arr.map((v, i) => `${i ? 'L' : 'M'}${(x(i) + cw / 2).toFixed(1)},${py(v).toFixed(1)}`).join('');
+      el('path', { d: path(D.retry_presp), fill: 'none', stroke: muted, 'stroke-width': 2, 'stroke-dasharray': '5 4' }, g);
+      el('path', { d: path(D.retry_all), fill: 'none', stroke: ink, 'stroke-width': 2.2 }, g);
+      const a = el('text', { x: x(3) + cw, y: py(D.retry_all[3]) - 6, fill: ink, 'font-size': 12, 'font-weight': 650 }, g); a.textContent = `all frames ${D.retry_all[3]}%`;
+      const b = el('text', { x: x(12), y: py(31) - 7, fill: muted, 'font-size': 12 }, g); b.textContent = 'probe responses, flat at ~31%';
+    }
+    y += lane.h + 14;
+  }
+  // time axis
+  D.labels.forEach((l, i) => { if (i % 5 === 0 || i === D.labels.length - 1) {
+    const t = el('text', { x: x(i) + cw / 2, y: y + 8, 'text-anchor': 'middle', fill: muted, 'font-size': 12 }, svg); t.textContent = l; } });
+  // markers
+  const mark = (pos, color, label, dy) => {
+    el('line', { x1: x(pos), x2: x(pos), y1: 4, y2: y - 10, stroke: color, 'stroke-width': 2 }, svg);
+    const bg = el('rect', { x: x(pos) + 4, y: dy - 13, width: label.length * 6.6 + 10, height: 18, rx: 3, fill: css('--panel'), opacity: 0.92 }, svg);
+    const t = el('text', { x: x(pos) + 9, y: dy, fill: color, 'font-size': 12, 'font-weight': 700 }, svg); t.textContent = label;
+  };
+  mark(1 + 28 / 60, css('--crit'), 'Critical alert 14:25:28', 24);
+  mark(7 + 51 / 60, css('--serious'), 'Serious alert 14:31:51', 250);
+  const it = el('text', { x: x(4) + 6, y: 162, fill: css('--info'), 'font-size': 12, 'font-weight': 650 }, svg); it.textContent = 'probe storm: a symptom of failed logins';
+  svg.setAttribute('viewBox', `0 0 1000 ${y + 16}`);
+}
+
+/* ---------------- heatmap */
+function drawHeat() {
+  const svg = $('#heat'); svg.innerHTML = '';
+  const n = D.labels.length, L = 92, cw = (640 - L - 6) / n, ch = 31, mx = Math.max(...D.heat.flat());
+  D.sensors.forEach((s, r) => {
+    const t = el('text', { x: 0, y: 10 + r * ch + ch / 2 + 4, fill: css('--ink'), 'font-size': 12 }, svg);
+    t.textContent = `S${s.name.slice(-2)}  ch ${s.ch}`;
+    D.heat[r].forEach((v, i) => {
+      const rect = el('rect', { x: L + i * cw + 1, y: 10 + r * ch + 1, width: cw - 2, height: ch - 2, rx: 2,
+        fill: v ? css('--crit') : css('--rule'), opacity: v ? (0.18 + 0.82 * v / mx).toFixed(2) : 0.5 }, svg);
+      const tt = document.createElementNS(NS, 'title');
+      tt.textContent = `${s.name}, ${D.labels[i]}: ${v} failed attempts`;
+      rect.appendChild(tt);
+    });
+  });
+  D.labels.forEach((l, i) => { if (i % 10 === 0) { const last = i === n - 1; const t = el('text', { x: last ? L + (i + 1) * cw : L + i * cw, y: 10 + D.sensors.length * ch + 18, 'text-anchor': last ? 'end' : 'start', fill: css('--muted'), 'font-size': 12 }, svg); t.textContent = l; } });
+}
+
+/* ---------------- channels */
+function drawChans() {
+  const svg = $('#chans'); svg.innerHTML = '';
+  const entries = Object.entries(D.aps_per_channel), mx = Math.max(...entries.map(e => e[1]));
+  const bh = 22, L = 70;
+  entries.forEach(([ch, v], i) => {
+    const y = 8 + i * (bh + 3), w = (520 - L - 40) * v / mx, hot = v >= 5;
+    const t = el('text', { x: 0, y: y + 15, fill: css('--ink'), 'font-size': 13 }, svg); t.textContent = 'ch ' + ch;
+    el('rect', { x: L, y, width: w, height: bh, rx: 3, fill: hot ? css('--serious') : css('--iot') }, svg);
+    const vt = el('text', { x: L + w + 6, y: y + 15, fill: hot ? css('--serious') : css('--muted'), 'font-size': 13, 'font-weight': 700 }, svg); vt.textContent = v;
+  });
+  svg.setAttribute('viewBox', `0 0 520 ${8 + entries.length * (bh + 3)}`);
+}
+
+/* ---------------- tables */
+function fillTables() {
+  $('#exlabel').textContent = `Client ${D.example.label} (masked). The AP asks for an identity every 30 s; the client answers each time; no login method ever starts; the AP disconnects it with reason 23 and it tries again.`;
+  const tb = $('#seq tbody');
+  const names = { AUTH_REQ: 'Authentication request', AUTH_RESP: 'Authentication response', ASSOC_REQ: 'Association request',
+    ASSOC_RESP: 'Association response', EAP_REQ: 'EAP Identity request', EAP_RESP: 'EAP Identity response', DEAUTH: 'Deauthentication' };
+  D.example.rows.slice(1, 15).forEach(([t, dir, kind, reason]) => {
+    const tr = document.createElement('tr');
+    tr.className = kind === 'DEAUTH' ? 'bad' : dir.startsWith('AP') ? 'ap' : 'cl';
+    tr.innerHTML = `<td>${t}</td><td>${dir.startsWith('AP') ? 'AP to client' : 'client to AP'}</td><td>${names[kind] || kind}${reason ? `, reason ${reason}` : ''}</td>`;
+    tb.appendChild(tr);
+  });
+  const vb = $('#vis tbody');
+  D.sensor_vis.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.sensor}</td><td class="num">${D.sensors[i].ch}</td><td class="num">${s.aps_heard}</td><td class="num">${s.clients_heard}</td><td class="num"${s.one_sided_attempts >= 0.99 ? ' style="color:var(--crit);font-weight:700"' : ''}>${Math.round(100 * s.one_sided_attempts)}%</td>`;
+    vb.appendChild(tr);
+  });
+}
+
+/* ---------------- savings calculator */
+const FIELDS = [
+  { id: 'users', group: 'The incident', label: 'Users affected per incident', min: 1, max: 500, step: 1, v: 63, unit: '', src: 'Measured here: 63 clients could not log in.' },
+  { id: 'rate', group: 'The incident', label: 'Loaded cost per user hour', min: 20, max: 150, step: 5, v: 70, unit: '$', src: 'Assumption.' },
+  { id: 'detB', group: 'Time to detect (minutes)', label: 'Today', min: 5, max: 240, step: 5, v: 30, unit: 'min', src: 'Assumption. Users usually notice before IT acts.' },
+  { id: 'detA', group: 'Time to detect (minutes)', label: 'With Airframe', min: 0, max: 30, step: 1, v: 1, unit: 'min', src: 'Measured alert: 5 s after the first failed login; 1 min allows for someone to read it.' },
+  { id: 'diaB', group: 'Time to diagnose (minutes)', label: 'Today', min: 5, max: 480, step: 5, v: 60, unit: 'min', src: 'Assumption. ZK Research: most Wi‑Fi issues take over 30 min.' },
+  { id: 'diaA', group: 'Time to diagnose (minutes)', label: 'With Airframe', min: 1, max: 120, step: 1, v: 15, unit: 'min', src: 'Assumption. The alert names the stage, owner and first check.' },
+  { id: 'eng', group: 'Engineering', label: 'Engineers pulled into triage', min: 1, max: 10, step: 1, v: 3, unit: '', src: 'Assumption.' },
+  { id: 'engRate', group: 'Engineering', label: 'Loaded engineer cost per hour', min: 40, max: 250, step: 5, v: 95, unit: '$', src: 'Assumption.' },
+  { id: 'wrong', group: 'Engineering', label: 'Incidents blamed on the wrong layer', min: 0, max: 60, step: 1, v: 38, unit: '%', src: 'ZK Research: Wi‑Fi blamed 64% of the time, root cause 40%, so ~38% of “Wi‑Fi” incidents are something else.' },
+  { id: 'wrongH', group: 'Engineering', label: 'Engineer hours lost per wrong‑layer chase', min: 0, max: 24, step: 1, v: 4, unit: 'h', src: 'Assumption.' },
+  { id: 'inc', group: 'Scale', label: 'Incidents per site per year', min: 1, max: 52, step: 1, v: 12, unit: '', src: 'Assumption: one a month.' },
+  { id: 'sites', group: 'Scale', label: 'Sites', min: 1, max: 10, step: 1, v: 1, unit: '', src: '' },
+  { id: 'prod', group: 'Production exposure', label: 'Share of incident time that stops a line', min: 0, max: 5, step: 0.25, v: 0, unit: '%', src: 'Off by default: in this capture the IoT network kept working.' },
+  { id: 'line', group: 'Production exposure', label: 'Cost of an idle line per hour', min: 100000, max: 3000000, step: 50000, v: 2300000, unit: '$', src: 'Siemens, True Cost of Downtime 2024 (automotive).' },
+];
+const PRESETS = {
+  office: { users: 63, prod: 0, sites: 1, inc: 12 },
+  mixed: { users: 63, prod: 1, sites: 1, inc: 12 },
+  multi: { users: 63, prod: 0, sites: 6, inc: 12 },
+};
+const S = Object.fromEntries(FIELDS.map(f => [f.id, f.v]));
+function fmtField(f, v) {
+  if (f.unit === '$') return v >= 100000 ? '$' + (v / 1e6).toFixed(2) + ' M' : '$' + v;
+  if (f.unit === '%') return v + '%';
+  if (f.unit) return v + ' ' + f.unit;
+  return String(v);
+}
+function buildInputs() {
+  const host = $('#inputs'); let group = null, fs = null;
+  FIELDS.forEach(f => {
+    if (f.group !== group) { group = f.group; fs = document.createElement('fieldset'); fs.innerHTML = `<legend>${group}</legend>`; host.appendChild(fs); }
+    const d = document.createElement('div'); d.className = 'in';
+    d.innerHTML = `<label for="f_${f.id}">${f.label}</label><output id="o_${f.id}" for="f_${f.id}"></output>
+      <input type="range" id="f_${f.id}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.v}">${f.src ? `<span class="src">${f.src}</span>` : ''}`;
+    fs.appendChild(d);
+    const inp = $('#f_' + f.id, d);
+    inp.addEventListener('input', () => { S[f.id] = +inp.value; document.querySelectorAll('.presets button').forEach(b => b.setAttribute('aria-pressed', 'false')); calc(); });
+  });
+}
+function setPreset(name) {
+  Object.assign(S, PRESETS[name]);
+  FIELDS.forEach(f => { $('#f_' + f.id).value = S[f.id]; });
+  document.querySelectorAll('.presets button').forEach(b => b.setAttribute('aria-pressed', b.dataset.preset === name));
+  calc();
+}
+function calc() {
+  FIELDS.forEach(f => { $('#o_' + f.id).textContent = fmtField(f, S[f.id]); });
+  const detSaved = Math.max(0, S.detB - S.detA), diaSaved = Math.max(0, S.diaB - S.diaA), mins = detSaved + diaSaved;
+  const people = S.users * mins / 60 * S.rate;
+  const eng = S.eng * diaSaved / 60 * S.engRate;
+  const wrong = S.wrong / 100 * S.wrongH * S.engRate;
+  const prod = S.prod / 100 * mins * S.line / 60;
+  const per = people + eng + wrong + prod, k = S.inc * S.sites;
+  $('#total').textContent = fmt$(per * k);
+  $('#perinc').textContent = `${mins} minutes saved per incident, worth ${fmt$(per)}; ${k} incidents a year.`;
+  const parts = [
+    ['People back to work sooner', people * k, css('--info')],
+    ['Less triage time', eng * k, css('--ink')],
+    ['No wrong‑layer chases', wrong * k, css('--iot')],
+    ['Production protected', prod * k, css('--crit')],
+  ];
+  const mx = Math.max(...parts.map(p => p[1]), 1);
+  $('#rows').innerHTML = parts.map(([l, v, c]) => `<div class="row"><span>${l}</span><b>${fmt$(v)}</b><div class="barw"><span style="width:${(100 * v / mx).toFixed(1)}%;background:${c}"></span></div></div>`).join('');
+  const perPct = 0.01 * mins * S.line / 60 * k;
+  $('#sens').textContent = `Sensitivity: each 1% of incident time that stops a production line would add ${fmt$(perPct)} a year at these settings. That single assumption matters more than all others combined, which is why it starts at zero.`;
+  // this incident
+  $('#t_cost').textContent = fmt$(D.offline_device_min / 60 * S.rate);
+  $('#t_shift').textContent = fmt$(63 * 8 * S.rate);
+  $('#t_hours').textContent = Math.round(D.offline_device_min / 60) + ' h';
+}
+document.querySelectorAll('.presets button').forEach(b => b.addEventListener('click', () => setPreset(b.dataset.preset)));
+
+function drawAll() { drawTape(); drawHeat(); drawChans(); }
+fillTables(); buildInputs(); calc(); drawAll();
+const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)'); if (mq && mq.addEventListener) mq.addEventListener('change', drawAll);
+new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>
+</body>
+</html>

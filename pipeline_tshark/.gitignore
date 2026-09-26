@@ -1,0 +1,4 @@
+out/
+.airframe_salt
+tests/data/
+__pycache__/

@@ -1,0 +1,96 @@
+id,severity,category,title,sensors,count,parent
+F094,critical,802.1X / EAP failure,802.1X / EAP failure across the whole SSID-2 network,sensor01;sensor02;sensor03;sensor04;sensor05;sensor06;sensor07;sensor08,63,
+F095,critical,Deauth / disassoc loop,Disconnect loops on 18 APs affecting 18 clients,,18,
+F029,high,4-way handshake failure,C-155c36: 4-way handshake failed 1x on AP-08 (SSID-1),sensor02,1,
+F010,high,Deauth / disassoc loop,"C-78fc65: disconnect loop on AP-02 (128x, every ~11 s)",sensor01,128,F095
+F008,high,Deauth / disassoc loop,"C-662717: disconnect loop on AP-20 (118x, every ~11 s)",sensor05,118,F095
+F014,high,Deauth / disassoc loop,"C-ab368c: disconnect loop on AP-01 (114x, every ~12 s)",sensor01,114,F095
+F005,high,Deauth / disassoc loop,"C-155344: disconnect loop on AP-10 (113x, every ~11 s)",sensor02,113,F095
+F015,high,Deauth / disassoc loop,"C-cb9c93: disconnect loop on AP-23 (110x, every ~12 s)",sensor06,110,F095
+F002,high,Deauth / disassoc loop,"C-04966c: disconnect loop on AP-12 (102x, every ~12 s)",sensor03,102,F095
+F009,high,Deauth / disassoc loop,"C-70955a: disconnect loop on AP-24 (97x, every ~13 s)",sensor07,97,F095
+F011,high,Deauth / disassoc loop,"C-965675: disconnect loop on AP-13 (95x, every ~14 s)",sensor03,95,F095
+F013,high,Deauth / disassoc loop,"C-a02eee: disconnect loop on AP-28 (88x, every ~14 s)",sensor08,88,F095
+F016,high,Deauth / disassoc loop,"C-d0a368: disconnect loop on AP-16 (85x, every ~15 s)",sensor04,85,F095
+F018,high,Deauth / disassoc loop,"C-fbdab3: disconnect loop on AP-04 (80x, every ~15 s)",sensor01,80,F095
+F007,high,Deauth / disassoc loop,"C-579c6b: disconnect loop on AP-17 (51x, every ~26 s)",sensor05,51,F095
+F004,high,Deauth / disassoc loop,"C-0c4a82: disconnect loop on AP-05 (49x, every ~25 s)",sensor01,49,F095
+F006,high,Deauth / disassoc loop,"C-1ca43e: disconnect loop on AP-27 (48x, every ~30 s)",sensor08,48,F095
+F017,high,Deauth / disassoc loop,"C-e08cd2: disconnect loop on AP-18 (48x, every ~27 s)",sensor05,48,F095
+F003,high,Deauth / disassoc loop,"C-073e3b: disconnect loop on AP-07 (47x, every ~26 s)",sensor02,47,F095
+F012,high,Deauth / disassoc loop,"C-9f1ef2: disconnect loop on AP-11 (44x, every ~27 s)",sensor03,44,F095
+F001,high,Deauth / disassoc loop,"C-0029e8: disconnect loop on AP-15 (41x, every ~28 s)",sensor04,41,F095
+F022,medium,802.1X / EAP failure,C-06d4de: 802.1X login failed 10x on AP-21 (SSID-2),sensor06,10,F094
+F024,medium,802.1X / EAP failure,C-0aff12: 802.1X login failed 10x on AP-16 (SSID-2),sensor04,10,F094
+F026,medium,802.1X / EAP failure,C-0e4740: 802.1X login failed 10x on AP-19 (SSID-2),sensor05,10,F094
+F027,medium,802.1X / EAP failure,C-125078: 802.1X login failed 10x on AP-23 (SSID-2),sensor06,10,F094
+F033,medium,802.1X / EAP failure,C-2d34b9: 802.1X login failed 10x on AP-02 (SSID-2),sensor01,10,F094
+F036,medium,802.1X / EAP failure,C-3453b3: 802.1X login failed 10x on AP-13 (SSID-2),sensor03,10,F094
+F037,medium,802.1X / EAP failure,C-37d80e: 802.1X login failed 10x on AP-21 (SSID-2),sensor06,10,F094
+F038,medium,802.1X / EAP failure,C-3f18d3: 802.1X login failed 10x on AP-09 (SSID-2),sensor02,10,F094
+F039,medium,802.1X / EAP failure,C-46417a: 802.1X login failed 10x on AP-08 (SSID-2),sensor02,10,F094
+F042,medium,802.1X / EAP failure,C-54f9b8: 802.1X login failed 10x on AP-29 (SSID-2),sensor08,10,F094
+F050,medium,802.1X / EAP failure,C-701f80: 802.1X login failed 10x on AP-03 (SSID-2),sensor01,10,F094
+F052,medium,802.1X / EAP failure,C-745570: 802.1X login failed 10x on AP-14 (SSID-2),sensor04,10,F094
+F053,medium,802.1X / EAP failure,C-758c2d: 802.1X login failed 10x on AP-05 (SSID-2),sensor01,10,F094
+F055,medium,802.1X / EAP failure,C-7b3f85: 802.1X login failed 10x on AP-10 (SSID-2),sensor02,10,F094
+F056,medium,802.1X / EAP failure,C-7e6c6b: 802.1X login failed 10x on AP-25 (SSID-2),sensor07,10,F094
+F058,medium,802.1X / EAP failure,C-905437: 802.1X login failed 10x on AP-12 (SSID-2),sensor03,10,F094
+F060,medium,802.1X / EAP failure,C-9ac3f9: 802.1X login failed 10x on AP-20 (SSID-2),sensor05,10,F094
+F064,medium,802.1X / EAP failure,C-ab723e: 802.1X login failed 10x on AP-03 (SSID-2),sensor01,10,F094
+F066,medium,802.1X / EAP failure,C-b3e9d5: 802.1X login failed 10x on AP-23 (SSID-2),sensor06,10,F094
+F070,medium,802.1X / EAP failure,C-c30ded: 802.1X login failed 10x on AP-09 (SSID-2),sensor02,10,F094
+F074,medium,802.1X / EAP failure,C-d7a9a5: 802.1X login failed 10x on AP-08 (SSID-2),sensor02,10,F094
+F077,medium,802.1X / EAP failure,C-e48524: 802.1X login failed 10x on AP-28 (SSID-2),sensor08,10,F094
+F079,medium,802.1X / EAP failure,C-e7cf96: 802.1X login failed 10x on AP-01 (SSID-2),sensor01,10,F094
+F080,medium,802.1X / EAP failure,C-ed4d3c: 802.1X login failed 10x on AP-25 (SSID-2),sensor07,10,F094
+F081,medium,802.1X / EAP failure,C-f20d33: 802.1X login failed 10x on AP-27 (SSID-2),sensor08,10,F094
+F020,medium,802.1X / EAP failure,C-013888: 802.1X login failed 9x on AP-04 (SSID-2),sensor01,9,F094
+F031,medium,802.1X / EAP failure,C-209d4c: 802.1X login failed 9x on AP-19 (SSID-2),sensor05,9,F094
+F032,medium,802.1X / EAP failure,C-25c9ed: 802.1X login failed 9x on AP-07 (SSID-2),sensor02,9,F094
+F034,medium,802.1X / EAP failure,C-2f5976: 802.1X login failed 9x on AP-24 (SSID-2),sensor07,9,F094
+F035,medium,802.1X / EAP failure,C-32dcdd: 802.1X login failed 9x on AP-04 (SSID-2),sensor01,9,F094
+F040,medium,802.1X / EAP failure,C-473df9: 802.1X login failed 9x on AP-15 (SSID-2),sensor04,9,F094
+F041,medium,802.1X / EAP failure,C-4d5bc6: 802.1X login failed 9x on AP-01 (SSID-2),sensor01,9,F094
+F043,medium,802.1X / EAP failure,C-56185c: 802.1X login failed 9x on AP-11 (SSID-2),sensor03,9,F094
+F044,medium,802.1X / EAP failure,C-563050: 802.1X login failed 9x on AP-13 (SSID-2),sensor03,9,F094
+F047,medium,802.1X / EAP failure,C-694cf6: 802.1X login failed 9x on AP-24 (SSID-2),sensor07,9,F094
+F048,medium,802.1X / EAP failure,C-6f2463: 802.1X login failed 9x on AP-18 (SSID-2),sensor05,9,F094
+F049,medium,802.1X / EAP failure,C-6f43bd: 802.1X login failed 9x on AP-02 (SSID-2),sensor01,9,F094
+F057,medium,802.1X / EAP failure,C-883e16: 802.1X login failed 9x on AP-14 (SSID-2),sensor04,9,F094
+F065,medium,802.1X / EAP failure,C-af6978: 802.1X login failed 9x on AP-29 (SSID-2),sensor08,9,F094
+F067,medium,802.1X / EAP failure,C-b425c6: 802.1X login failed 9x on AP-20 (SSID-2),sensor05,9,F094
+F068,medium,802.1X / EAP failure,C-c10b09: 802.1X login failed 9x on AP-10 (SSID-2),sensor02,9,F094
+F069,medium,802.1X / EAP failure,C-c1d785: 802.1X login failed 9x on AP-17 (SSID-2),sensor05,9,F094
+F072,medium,802.1X / EAP failure,C-cd7276: 802.1X login failed 9x on AP-16 (SSID-2),sensor04,9,F094
+F076,medium,802.1X / EAP failure,C-e3b850: 802.1X login failed 9x on AP-28 (SSID-2),sensor08,9,F094
+F078,medium,802.1X / EAP failure,C-e70ae0: 802.1X login failed 9x on AP-12 (SSID-2),sensor03,9,F094
+F019,medium,802.1X / EAP failure,C-0029e8: 802.1X login failed 5x on AP-15 (SSID-2),sensor04,5,F094
+F021,medium,802.1X / EAP failure,C-04966c: 802.1X login failed 5x on AP-12 (SSID-2),sensor03,5,F094
+F023,medium,802.1X / EAP failure,C-073e3b: 802.1X login failed 5x on AP-07 (SSID-2),sensor02,5,F094
+F025,medium,802.1X / EAP failure,C-0c4a82: 802.1X login failed 5x on AP-05 (SSID-2),sensor01,5,F094
+F028,medium,802.1X / EAP failure,C-155344: 802.1X login failed 5x on AP-10 (SSID-2),sensor02,5,F094
+F030,medium,802.1X / EAP failure,C-1ca43e: 802.1X login failed 5x on AP-27 (SSID-2),sensor08,5,F094
+F051,medium,802.1X / EAP failure,C-70955a: 802.1X login failed 5x on AP-24 (SSID-2),sensor07,5,F094
+F061,medium,802.1X / EAP failure,C-9f1ef2: 802.1X login failed 5x on AP-11 (SSID-2),sensor03,5,F094
+F062,medium,802.1X / EAP failure,C-a02eee: 802.1X login failed 5x on AP-28 (SSID-2),sensor08,5,F094
+F082,medium,802.1X / EAP failure,C-fbdab3: 802.1X login failed 5x on AP-04 (SSID-2),sensor01,5,F094
+F045,medium,802.1X / EAP failure,C-579c6b: 802.1X login failed 4x on AP-17 (SSID-2),sensor05,4,F094
+F046,medium,802.1X / EAP failure,C-662717: 802.1X login failed 4x on AP-20 (SSID-2),sensor05,4,F094
+F054,medium,802.1X / EAP failure,C-78fc65: 802.1X login failed 4x on AP-02 (SSID-2),sensor01,4,F094
+F059,medium,802.1X / EAP failure,C-965675: 802.1X login failed 4x on AP-13 (SSID-2),sensor03,4,F094
+F063,medium,802.1X / EAP failure,C-ab368c: 802.1X login failed 4x on AP-01 (SSID-2),sensor01,4,F094
+F071,medium,802.1X / EAP failure,C-cb9c93: 802.1X login failed 4x on AP-23 (SSID-2),sensor06,4,F094
+F075,medium,802.1X / EAP failure,C-e08cd2: 802.1X login failed 4x on AP-18 (SSID-2),sensor05,4,F094
+F073,medium,802.1X / EAP failure,C-d0a368: 802.1X login failed 3x on AP-16 (SSID-2),sensor04,3,F094
+F092,medium,Co-channel overlap,Channel 36: 5 APs share it,sensor01,5,
+F093,medium,Co-channel overlap,Channel 40: 5 APs share it,sensor02,5,
+F091,medium,Join burst,SSID-1: 24 join attempts from 24 clients in 2 min,sensor01;sensor02;sensor03;sensor04;sensor05;sensor06;sensor07;sensor08,24,
+F088,low,Probe storm,C-a02eee: 27 probe requests in 10 s,sensor01;sensor03;sensor04;sensor05;sensor06;sensor07;sensor08,27,
+F086,low,Probe storm,C-994a1b: 24 probe requests in 10 s,sensor02;sensor03;sensor04;sensor05;sensor07;sensor08,24,
+F083,low,Probe storm,C-0029e8: 20 probe requests in 10 s,sensor02;sensor03;sensor04;sensor05;sensor08,20,
+F085,low,Probe storm,C-155344: 20 probe requests in 10 s,sensor02;sensor03;sensor04;sensor05;sensor08,20,
+F090,low,Probe storm,C-fbdab3: 20 probe requests in 10 s,sensor02;sensor03;sensor04;sensor05;sensor08,20,
+F087,low,Probe storm,C-9f1ef2: 19 probe requests in 10 s,sensor01;sensor02;sensor04;sensor07;sensor08,19,
+F084,low,Probe storm,C-128943: 17 probe requests in 10 s,sensor02;sensor03;sensor04;sensor05;sensor08,17,
+F089,low,Probe storm,C-e08cd2: 17 probe requests in 10 s,sensor01;sensor04;sensor06;sensor07;sensor08,17,

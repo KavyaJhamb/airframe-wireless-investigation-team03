@@ -1,0 +1,21 @@
+Loading masked frames...
+  1,118,853 frames, 8 sensors, 29 APs (53 networks), 99 clients
+  698 join attempts, 1976 disconnects, 0 roams
+
+95 findings:
+  [critical] 802.1X / EAP failure         802.1X / EAP failure across the whole SSID-2 network
+  [critical] Deauth / disassoc loop       Disconnect loops on 18 APs affecting 18 clients
+  [high    ] 4-way handshake failure      C-155c36: 4-way handshake failed 1x on AP-08 (SSID-1)
+  [medium  ] Co-channel overlap           Channel 36: 5 APs share it
+  [medium  ] Co-channel overlap           Channel 40: 5 APs share it
+  [medium  ] Join burst                   SSID-1: 24 join attempts from 24 clients in 2 min
+  [low     ] Probe storm                  C-a02eee: 27 probe requests in 10 s
+  [low     ] Probe storm                  C-994a1b: 24 probe requests in 10 s
+  [low     ] Probe storm                  C-0029e8: 20 probe requests in 10 s
+  [low     ] Probe storm                  C-155344: 20 probe requests in 10 s
+  [low     ] Probe storm                  C-fbdab3: 20 probe requests in 10 s
+  [low     ] Probe storm                  C-9f1ef2: 19 probe requests in 10 s
+  [low     ] Probe storm                  C-128943: 17 probe requests in 10 s
+  [low     ] Probe storm                  C-e08cd2: 17 probe requests in 10 s
+
+Outputs in out/ - start the dashboard with:  streamlit run dashboard.py
